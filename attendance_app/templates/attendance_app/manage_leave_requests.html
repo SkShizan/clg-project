@@ -1,0 +1,45 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+  <h2>Manage Leave Requests</h2>
+  <p>The following requests are pending approval.</p>
+
+  <div class="card">
+    <div class="card-body">
+      {% if pending_requests %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Dates</th>
+              <th>Reason</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in pending_requests %}
+            <tr>
+              <td>{{ req.employee.user.get_full_name|default:req.employee.user.username }}</td>
+              <td>{{ req.start_date }} to {{ req.end_date }}</td>
+              <td>{{ req.reason|truncatewords:10|default:"N/A" }}</td>
+              <td>
+                <form method="post" action="{% url 'update_leave_status' req.id 'approve' %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form method="post" action="{% url 'update_leave_status' req.id 'reject' %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="text-muted">There are no pending leave requests.</p>
+      {% endif %}
+    </div>
+  </div>
+
+{% endblock %}

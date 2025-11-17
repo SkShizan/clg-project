@@ -1,0 +1,58 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-5">
+      <h2>Request Leave</h2>
+      <div class="card">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            
+            {{ form.as_p }}
+            
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <h2>My Leave History</h2>
+      <div class="card">
+        <div class="card-body">
+          {% if past_requests %}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Dates</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for req in past_requests %}
+                <tr>
+                  <td>{{ req.start_date }} to {{ req.end_date }}</td>
+                  <td>{{ req.reason|truncatewords:5|default:"N/A" }}</td>
+                  <td>
+                    {% if req.status == 'PENDING' %}
+                      <span class="badge bg-warning">Pending</span>
+                    {% elif req.status == 'APPROVED' %}
+                      <span class="badge bg-success">Approved</span>
+                    {% else %}
+                      <span class="badge bg-danger">Rejected</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="text-muted">You have no past leave requests.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

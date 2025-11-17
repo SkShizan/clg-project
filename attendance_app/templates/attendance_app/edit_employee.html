@@ -1,0 +1,22 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+  <h2>Edit Employee: {{ employee.user.get_full_name|default:employee.user.username }}</h2>
+  <p>Update the user account and employee profile.</p>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        
+        <a href="{% url 'delete_employee' employee.id %}" class="btn btn-danger ms-auto">Delete Employee</a>
+        </form>
+    </div>
+  </div>
+
+{% endblock %}

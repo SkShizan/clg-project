@@ -1,0 +1,19 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+  <h2>Add New Employee</h2>
+  <p>Create a new user account and employee profile.</p>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        {{ form.as_p }}
+        
+        <button type.submit" class="btn btn-primary">Create Employee</button>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}
