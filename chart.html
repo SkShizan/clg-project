@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Diagrams</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .diagram-container {
+            background-color: #ffffff;
+            border: 1px solid #d1d1d1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h2 {
+            text-align: center;
+            font-size: 16pt;
+            font-family: 'Times New Roman', Times, serif;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .mermaid {
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+    <!-- 1. Include Mermaid.js library -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</head>
+<body>
+
+    <div class="diagram-container">
+        <h2>3.5.1. Gantt Chart</h2>
+        <div class="mermaid">
+            gantt
+                title Attendance Management System Project
+                dateFormat  YYYY-MM-DD
+                section Project Phases
+                Analysis & Design :active, 2024-09-01, 14d
+                Development : 2024-09-15, 30d
+                Testing : 2024-10-15, 10d
+                Documentation : 2024-09-15, 40d
+
+                section Analysis & Design
+                Requirements Gathering :done, 2024-09-01, 7d
+                Feasibility Study :done, 2024-09-04, 3d
+                System & DB Design (UML) :done, 2024-09-07, 7d
+
+                section Development
+                Phase 1: Foundation (Models) :crit, 2024-09-15, 7d
+                Phase 2: Employee Features :crit, 2024-09-22, 14d
+                Phase 3: Admin Features :crit, 2024-10-06, 9d
+
+                section Testing
+                Unit Testing : 2024-10-15, 5d
+                Integration Testing : 2024-10-20, 5d
+                
+                section Documentation
+                Write Report : 2024-10-15, 10d
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>3.5.2. PERT Chart</h2>
+        <div class="mermaid">
+            flowchart TD
+                A[Start] --> B(Analysis & Design);
+                B --> C(Database Models);
+                C --> D(Employee Features);
+                C --> E(Admin Features);
+                D --> F(Integration Testing);
+                E --> F;
+                F --> G(Final Documentation);
+                G --> H[Finish];
+        </div>
+    </div>
+    
+    <div class="diagram-container">
+        <h2>3.8.4. Entity Relationship Diagram (ERD)</h2>
+        <div class="mermaid">
+            erDiagram
+                CustomUser ||--|| Employee : "has"
+                Employee ||--|{ Attendance : "logs"
+                Employee ||--|{ LeaveRequest : "submits"
+                
+                CustomUser {
+                    int id PK
+                    string username
+                    string password
+                    string first_name
+                    string last_name
+                    string email
+                    bool is_superuser
+                }
+                Employee {
+                    int user_id PK
+                    int CustomUser_id FK
+                    string department
+                    string designation
+                }
+                Attendance {
+                    int id PK
+                    int Employee_user_id FK
+                    datetime check_in
+                    datetime check_out
+                }
+                LeaveRequest {
+                    int id PK
+                    int Employee_user_id FK
+                    date start_date
+                    date end_date
+                    string reason
+                    string status
+                }
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>3.8.1. Class Diagram - (Corrected)</h2>
+        <div class="mermaid">
+            classDiagram
+                class AbstractUser {
+                    +string username
+                    +string password
+                    +string email
+                    +string first_name
+                    +string last_name
+                    +bool is_superuser
+                }
+                class CustomUser {
+                    +login()
+                    +logout()
+                }
+                class Employee {
+                    +CustomUser user
+                    +string department
+                    +string designation
+                }
+                class Attendance {
+                    +Employee employee
+                    +datetime check_in
+                    +datetime check_out
+                }
+                class LeaveRequest {
+                    +Employee employee
+                    +date start_date
+                    +date end_date
+                    +string reason
+                    +string status
+                }
+                
+                AbstractUser <|-- CustomUser
+                CustomUser "1" -- "1" Employee : "user"
+                Employee "1" -- "N" Attendance : "employee"
+                Employee "1" -- "N" LeaveRequest : "employee"
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>3.8.5. Use Case Diagram - (Corrected)</h2>
+        <div class="mermaid">
+           useCaseDiagram
+              left to right
+              actor Employee
+              actor Admin
+              
+              rectangle "Attendance Management System" {
+                Employee -- (Login / Logout)
+                Employee -- (Mark Attendance)
+                Employee -- (View Own Records)
+                Employee -- (Apply for Leave)
+                
+                Admin -- (Manage Employees CRUD)
+                Admin -- (Manage Leave Requests)
+                Admin -- (View All Records)
+              }
+              
+              Admin --|> Employee
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>3.8.2. Activity Diagram (Mark Attendance) - (Corrected)</h2>
+        <div class="mermaid">
+            flowchart TD
+                A(Start) --> B{"Employee Clicks 'Mark Attendance'"};
+                B --> C{"Record for today exists?"};
+                C -- "No" --> D["Create new Attendance record"];
+                D --> E["Set check_in time"];
+                E --> Z(End);
+                C -- "Yes" --> F{"check_out is empty?"};
+                F -- "Yes" --> G["Update record with check_out time"];
+                G --> Z;
+                F -- "No" --> H["Show 'Already checked out'"];
+                H --> Z;
+        </div>
+    </div>
+    
+    <div class="diagram-container">
+        <h2>3.8.3. Sequence Diagram (Approve Leave)</h2>
+        <div class="mermaid">
+            sequenceDiagram
+                actor Admin
+                participant Browser
+                participant urls.py as Router
+                participant views.py as View
+                participant models.py as Model
+                participant Database
+                
+                Admin->>Browser: Click 'Approve' (GET /approve-leave/5/)
+                Browser->>Router: GET /approve-leave/5/
+                Router->>View: approve_leave(request, pk=5)
+                View->>View: Check if user is_superuser
+                View->>Model: get_object_or_404(LeaveRequest, pk=5)
+                Model->>Database: SELECT * FROM LeaveRequest WHERE id=5
+                Database-->>Model: Return LeaveRequest object
+                Model-->>View: Return LeaveRequest object
+                View->>View: leave_request.status = 'approved'
+                View->>Model: leave_request.save()
+                Model->>Database: UPDATE LeaveRequest SET status='approved' WHERE id=5
+                Database-->>Model: Success
+                Model-->>View: Success
+                View->>Browser: HTTP Redirect to 'manage_leave_requests'
+                Browser->>Router: GET /manage-leave-requests/
+                Router->>View: manage_leave_requests(request)
+                View-->>Browser: Render updated page
+        </div>
+    </div>
+
+</body>
+</html>

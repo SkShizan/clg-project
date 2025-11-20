@@ -1,25 +1,59 @@
 {% extends 'attendance_app/base.html' %}
 
 {% block content %}
-  <h2>Delete Employee</h2>
-  <hr>
-
-  <div class="alert alert-danger">
-    <h4>Are you sure?</h4>
-    <p>You are about to permanently delete the employee:</p>
-    <ul>
-      <li><strong>User:</strong> {{ employee.user.username }}</li>
-      <li><strong>Name:</strong> {{ employee.user.get_full_name }}</li>
-      <li><strong>Employee ID:</strong> {{ employee.employee_id }}</li>
-    </ul>
-    <p><strong>This action cannot be undone.</strong> All associated attendance and leave records will be lost.</p>
-  </div>
-
-  <form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Yes, I am sure. Delete this employee.</button>
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     
-    <a href="{% url 'edit_employee' employee.id %}" class="btn btn-secondary">Cancel</a>
-  </form>
+    <!-- Confirmation Card -->
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-t-8 border-red-500">
+        
+        <!-- Warning Header -->
+        <div class="bg-red-50 p-8 text-center border-b border-red-100">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <svg class="h-8 w-8 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">Delete Employee?</h3>
+            <p class="mt-2 text-sm text-red-600">
+                Warning: This action cannot be undone.
+            </p>
+        </div>
 
+        <!-- Content Body -->
+        <div class="px-8 py-6">
+            <p class="text-gray-500 text-center mb-6">
+                You are about to permanently remove the following employee and all their associated attendance records:
+            </p>
+
+            <!-- Employee Details Box -->
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 text-sm mb-8">
+                <div class="flex justify-between py-2 border-b border-gray-200">
+                    <span class="text-gray-500">Full Name</span>
+                    <span class="font-bold text-[#296073]">{{ employee.user.get_full_name|default:"(No Name)" }}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-200">
+                    <span class="text-gray-500">Username</span>
+                    <span class="font-medium text-gray-900">{{ employee.user.username }}</span>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-500">Employee ID</span>
+                    <span class="font-mono font-medium text-[#845ec2]">{{ employee.employee_id }}</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <form method="post" class="flex flex-col gap-3">
+                {% csrf_token %}
+                
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-[1.02]">
+                    Yes, Delete Permanently
+                </button>
+
+                <a href="{% url 'edit_employee' employee.id %}" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3596b5] transition-all duration-200">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
