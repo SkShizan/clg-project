@@ -1,0 +1,166 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header & Date Filter Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#296073]">Admin Dashboard</h2>
+            <p class="text-gray-500 mt-1">
+                Daily Attendance Report for <span class="text-[#845ec2] font-bold">{{ selected_date|date:"F j, Y" }}</span>
+            </p>
+        </div>
+
+        <!-- Date Picker Form -->
+        <div class="bg-white p-2 rounded-2xl shadow-sm border border-[#adc5cf]/30">
+            <form method="get" class="flex items-center space-x-2">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <input type="date" 
+                           name="date" 
+                           value="{{ selected_date|date:'Y-m-d' }}" 
+                           class="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3596b5] focus:border-transparent text-gray-600"
+                           required>
+                </div>
+                <button type="submit" class="bg-[#296073] hover:bg-[#3596b5] text-white px-6 py-2 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                    Go
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats/Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Card 1: Total Present -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-green-100 flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 font-medium">Present Today</p>
+                <!-- We use an ID here to update the count via JS -->
+                <p class="text-2xl font-bold text-gray-800" id="present-count-display">
+                    --
+                </p>
+            </div>
+        </div>
+        
+        <!-- Optional Card 2: Total Absent -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-100 flex items-center">
+             <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 font-medium">Absent Today</p>
+                <p class="text-2xl font-bold text-gray-800" id="absent-count-display">
+                    --
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-[#adc5cf]/30 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+            <h5 class="text-lg font-bold text-[#296073] flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-[#845ec2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Daily Report
+            </h5>
+            <!-- Export button placeholder -->
+            <button class="text-sm text-[#3596b5] hover:text-[#296073] font-medium">Download CSV</button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-[#adc5cf]/20">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Check In</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Check Out</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for record in attendance_list %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                            #{{ record.employee.employee_id }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="h-8 w-8 rounded-full bg-[#845ec2]/10 flex items-center justify-center text-[#845ec2] font-bold text-xs mr-3">
+                                    {{ record.employee.user.username|slice:":2"|upper }}
+                                </div>
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ record.employee.user.get_full_name|default:record.employee.user.username }}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if record.status == 'PRESENT' %}
+                                <!-- Added 'js-present-marker' class for counting -->
+                                <span class="js-present-marker px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Present
+                                </span>
+                            {% elif record.status == 'ABSENT' %}
+                                <!-- Added 'js-absent-marker' class for counting -->
+                                <span class="js-absent-marker px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Absent
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ record.status }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                            {{ record.check_in|default:"---" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                            {{ record.check_out|default:"---" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <p class="text-base font-medium">No records found for this date.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Footer pagination placeholder -->
+        <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+            <span class="text-xs text-gray-500">Showing all records</span>
+        </div>
+    </div>
+</div>
+
+<!-- Script to count Present/Absent dynamically -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Count Present
+        const presentCount = document.querySelectorAll('.js-present-marker').length;
+        const presentDisplay = document.getElementById('present-count-display');
+        if(presentDisplay) presentDisplay.innerText = presentCount;
+
+        // Count Absent
+        const absentCount = document.querySelectorAll('.js-absent-marker').length;
+        const absentDisplay = document.getElementById('absent-count-display');
+        if(absentDisplay) absentDisplay.innerText = absentCount;
+    });
+</script>
+{% endblock %}

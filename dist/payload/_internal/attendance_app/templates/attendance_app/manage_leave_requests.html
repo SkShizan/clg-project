@@ -1,0 +1,125 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#296073]">Manage Leave Requests</h2>
+            <p class="text-gray-500 mt-1">Review and act on pending employee leave applications.</p>
+        </div>
+        
+        <!-- Optional: Quick Stat -->
+        <div class="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-2 flex items-center">
+            <div class="h-2 w-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
+            <span class="text-sm font-bold text-yellow-700">{{ pending_requests|length }} Pending</span>
+        </div>
+    </div>
+
+    <!-- Requests Table Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-[#adc5cf]/30 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+            <h3 class="text-lg font-bold text-[#296073] flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-[#845ec2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Pending Approvals
+            </h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            {% if pending_requests %}
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-[#adc5cf]/20">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Employee</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Dates</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Reason</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-[#296073] uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for req in pending_requests %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <!-- Employee Column -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="h-8 w-8 rounded-full bg-[#845ec2]/10 flex items-center justify-center text-[#845ec2] font-bold text-xs mr-3">
+                                    {{ req.employee.user.username|slice:":2"|upper }}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-gray-900">
+                                        {{ req.employee.user.get_full_name|default:req.employee.user.username }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">ID: {{ req.employee.employee_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Dates Column -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <div class="flex flex-col">
+                                <span class="font-medium">{{ req.start_date }}</span>
+                                <span class="text-xs text-gray-400 mx-1">to</span>
+                                <span class="font-medium">{{ req.end_date }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Reason Column -->
+                        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="{{ req.reason }}">
+                            {{ req.reason|truncatewords:10|default:"N/A" }}
+                        </td>
+
+                        <!-- Actions Column -->
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end space-x-3">
+                                <!-- Approve Form -->
+                                <form method="post" action="{% url 'update_leave_status' req.id 'approve' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Approve
+                                    </button>
+                                </form>
+
+                                <!-- Reject Form -->
+                                <form method="post" action="{% url 'update_leave_status' req.id 'reject' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="p-12 text-center">
+                <div class="mx-auto h-12 w-12 bg-green-50 rounded-full flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">All caught up!</h3>
+                <p class="mt-1 text-sm text-gray-500">There are no pending leave requests to review.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+            <span class="text-xs text-gray-500">
+                Showing {{ pending_requests|length }} pending items
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}

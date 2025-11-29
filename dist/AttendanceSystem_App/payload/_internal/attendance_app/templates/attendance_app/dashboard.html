@@ -1,0 +1,133 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Welcome Header -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-[#296073]">Welcome, {{ employee.user.get_full_name|default:employee.user.username }}!</h2>
+        <p class="text-gray-500 mt-1">This is your attendance dashboard for <strong class="text-[#845ec2]">{{ attendance.date }}</strong>.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- LEFT COLUMN: Status & Actions -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-[#adc5cf]/30 sticky top-6">
+                
+                <!-- Header Area -->
+                <div class="bg-[#296073] p-6 text-center">
+                    <p class="text-white/80 text-xs uppercase tracking-widest font-semibold">Current Status</p>
+                    
+                    {% if attendance.status == 'ABSENT' %}
+                        <div class="mt-2 inline-flex items-center bg-red-100 text-red-800 text-sm font-bold px-4 py-1 rounded-full shadow-sm">
+                            <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                            ABSENT
+                        </div>
+                    {% elif attendance.status == 'PRESENT' %}
+                        <div class="mt-2 inline-flex items-center bg-green-100 text-green-800 text-sm font-bold px-4 py-1 rounded-full shadow-sm">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                            PRESENT
+                        </div>
+                    {% else %}
+                         <div class="mt-2 inline-flex items-center bg-blue-100 text-blue-800 text-sm font-bold px-4 py-1 rounded-full shadow-sm">
+                            {{ attendance.status }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Area -->
+                <div class="p-8 flex flex-col items-center">
+                    
+                    {% if attendance.status == 'ABSENT' %}
+                        <div class="text-center mb-8">
+                            <p class="text-gray-500 text-sm">You have not checked in yet.</p>
+                        </div>
+                        <form method="post" action="{% url 'check_in' %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full py-4 px-4 text-base font-bold rounded-xl text-white bg-[#845ec2] hover:bg-[#296073] shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                Check In Now
+                            </button>
+                        </form>
+
+                    {% elif attendance.status == 'PRESENT' and attendance.check_out is None %}
+                        <div class="text-center mb-8">
+                            <p class="text-gray-500 text-sm mb-1">Checked In At</p>
+                            <p class="text-4xl font-extrabold text-[#1e293b]">{{ attendance.check_in }}</p>
+                        </div>
+                        <form method="post" action="{% url 'check_out' %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full py-4 px-4 text-base font-bold rounded-xl text-white bg-[#3596b5] hover:bg-[#296073] shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                Check Out Now
+                            </button>
+                        </form>
+
+                    {% elif attendance.status == 'PRESENT' and attendance.check_out is not None %}
+                        <div class="text-center w-full">
+                            <div class="bg-green-50 rounded-lg p-4 mb-4 border border-green-100">
+                                <p class="text-xs text-gray-500 uppercase">Shift Completed</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="font-bold text-[#296073]">{{ attendance.check_in }}</span>
+                                    <span class="text-gray-300">&rarr;</span>
+                                    <span class="font-bold text-[#296073]">{{ attendance.check_out }}</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-400 text-sm italic">You have completed your day.</p>
+                        </div>
+
+                    {% else %}
+                        <p class="text-gray-500">No actions available.</p>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: History Table -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl shadow-lg border border-[#adc5cf]/30 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="text-lg font-bold text-[#296073]">My Attendance History</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    {% if attendance_history %}
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-[#adc5cf]/20">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Check In</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Check Out</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for record in attendance_history %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ record.date }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if record.status == 'PRESENT' %}
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Present</span>
+                                    {% elif record.status == 'ABSENT' %}
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Absent</span>
+                                    {% else %}
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ record.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.check_in|default:"---" }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.check_out|default:"---" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-8 text-center text-gray-500">
+                        <p>No attendance history found.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

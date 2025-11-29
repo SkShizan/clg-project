@@ -1,0 +1,120 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#296073]">Manage Employees</h2>
+            <p class="text-gray-500 mt-1">View, edit, or remove employee profiles.</p>
+        </div>
+        
+        <!-- Add Button -->
+        <a href="{% url 'add_employee' %}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-white bg-[#845ec2] hover:bg-[#296073] shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add New Employee
+        </a>
+    </div>
+
+    <!-- Employees Table Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-[#adc5cf]/30 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-[#adc5cf]/20">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Employee ID</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Department</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Role</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-[#296073] uppercase tracking-wider">Join Date</th>
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-[#296073] uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for emp in employees %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150 group">
+                        <!-- Name Column with Avatar -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 flex-shrink-0">
+                                    <span class="h-10 w-10 rounded-full bg-[#845ec2]/10 flex items-center justify-center text-[#845ec2] font-bold text-sm">
+                                        {{ emp.user.username|slice:":2"|upper }}
+                                    </span>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-bold text-gray-900">
+                                        <a href="{% url 'edit_employee' emp.id %}" class="hover:text-[#3596b5] transition-colors">
+                                            {{ emp.user.get_full_name|default:emp.user.username }}
+                                        </a>
+                                    </div>
+                                    <div class="text-xs text-gray-500">{{ emp.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                            {{ emp.employee_id }}
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                                {{ emp.department.name|default:"---" }}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ emp.role.name|default:"---" }}
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ emp.join_date|date:"M d, Y"|default:"-" }}
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end space-x-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'edit_employee' emp.id %}" class="text-[#3596b5] hover:text-[#296073] bg-cyan-50 hover:bg-cyan-100 p-2 rounded-lg transition-colors" title="Edit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </a>
+                                <a href="{% url 'delete_employee' emp.id %}" class="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <p class="text-lg font-medium text-gray-500">No employees found</p>
+                                <p class="text-sm text-gray-400 mt-1">Get started by adding a new team member.</p>
+                                <a href="{% url 'add_employee' %}" class="mt-4 text-[#3596b5] hover:text-[#296073] font-semibold text-sm hover:underline">
+                                    + Add First Employee
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination Footer (Placeholder) -->
+        <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+            <span class="text-xs text-gray-500">
+                Showing {{ employees|length }} employees
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}
